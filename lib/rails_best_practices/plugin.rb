@@ -13,7 +13,7 @@ module Danger
   #
   #          my_plugin.warn_on_mondays
   #
-  # @see  Atsushi Takayama/danger-rails_best_practices
+  # @see  edvakf/danger-rails_best_practices
   # @tags monday, weekends, time, rattata
   #
   class DangerRailsBestPractices < Plugin
