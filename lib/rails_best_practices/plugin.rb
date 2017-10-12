@@ -1,33 +1,63 @@
+# frozen_string_literal: true
+
+require "tmpdir"
+require "json"
+
 module Danger
-  # This is your plugin class. Any attributes or methods you expose here will
-  # be available from within your Dangerfile.
+  # A danger plugin to check your rails project through rails_best_practices.
   #
-  # To be published on the Danger plugins site, you will need to have
-  # the public interface documented. Danger uses [YARD](http://yardoc.org/)
-  # for generating documentation from your plugin source, and you can verify
-  # by running `danger plugins lint` or `bundle exec rake spec`.
+  # @example Check by rails_best_practices
   #
-  # You should replace these comments with a public description of your library.
-  #
-  # @example Ensure people are well warned about merging on Mondays
-  #
-  #          my_plugin.warn_on_mondays
+  #          rails_best_practices.check
   #
   # @see  edvakf/danger-rails_best_practices
-  # @tags monday, weekends, time, rattata
+  # @tags ruby, rails
   #
   class DangerRailsBestPractices < Plugin
-
-    # An attribute that you can read/write from your Dangerfile
+    # Runs rails_best_practices and comment on P-R
     #
-    # @return   [Array<String>]
-    attr_accessor :my_attribute
+    # @param   [Array<String>] command_opts
+    #          command line options to rails_best_practices command
+    # @return  [void]
+    def check(command_opts: [])
+      files = files_to_lint
+      return if files.empty?
 
-    # A method that you can call from your Dangerfile
-    # @return   [Array<String>]
-    #
-    def warn_on_mondays
-      warn 'Trying to merge code on a Monday' if Date.today.wday == 1
+      Dir.mktmpdir do |dir|
+        output_file = File.join(dir, "output.json")
+
+        command_opts.unshift "rails_best_practices"
+        command_opts.unshift "bundle", "exec" if File.exist?("Gemfile")
+        command_opts.push "--format", "json"
+        command_opts.push "--output-file", output_file
+
+        # FIXME: has problem when file name contains a comma
+        command_opts.push "--only", files_to_lint.map { |f| Regexp.escape(f) }.join(",")
+
+        ok = system(*command_opts)
+
+        unless ok
+          raise "Error executing rails_best_practices (error code: #{$?})"
+        end
+
+        output = JSON.parse(File.read(output_file))
+
+        unless output.empty?
+          output.each do |result|
+            warn(result["message"], file: relative_path(result["filename"]), line: result["line_number"].to_i)
+          end
+        end
+      end
+    end
+
+    private
+
+    def files_to_lint
+      git.modified_files + git.added_files
+    end
+
+    def relative_path(file)
+      file.sub(Dir.pwd, "").sub("/", "") if file.start_with? Dir.pwd
     end
   end
 end

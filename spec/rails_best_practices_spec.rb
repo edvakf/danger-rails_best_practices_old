@@ -12,30 +12,32 @@ module Danger
     describe "with Dangerfile" do
       before do
         @dangerfile = testing_dangerfile
-        @my_plugin = @dangerfile.rails_best_practices
+        @rails_best_practices = @dangerfile.rails_best_practices
       end
 
-      # Some examples for writing tests
-      # You should replace these with your own.
+      it "can handle no changed files" do
+        allow(@rails_best_practices.git).to receive(:modified_files).and_return([])
+        allow(@rails_best_practices.git).to receive(:added_files).and_return([])
 
-      it "Warns on a monday" do
-        monday_date = Date.parse("2016-07-11")
-        allow(Date).to receive(:today).and_return monday_date
+        @rails_best_practices.check
 
-        @my_plugin.warn_on_mondays
-
-        expect(@dangerfile.status_report[:warnings]).to eq(["Trying to merge code on a Monday"])
+        expect(@rails_best_practices.violation_report[:warnings])
+          .to be_empty
       end
 
-      it "Does nothing on a tuesday" do
-        monday_date = Date.parse("2016-07-12")
-        allow(Date).to receive(:today).and_return monday_date
+      it "checks" do
+        allow(@rails_best_practices.git).to receive(:modified_files).and_return(["app/controllers/users_controller.rb"])
+        allow(@rails_best_practices.git).to receive(:added_files).and_return(["app/models/user.rb"])
+        allow(@rails_best_practices).to receive(:system)
+          .with("bundle", "exec", "rails_best_practices", "--format", "json", "--output-file", anything, "--only", "app/controllers/users_controller\\.rb,app/models/user\\.rb")
+          .and_return(true)
+        allow(File).to receive(:read).and_return('[{"filename":"' + File.join(Dir.pwd, "app/models/user.rb") + '","line_number":"2","message":"foo"}]')
 
-        @my_plugin.warn_on_mondays
+        @rails_best_practices.check
 
-        expect(@dangerfile.status_report[:warnings]).to eq([])
+        expect(@rails_best_practices.violation_report[:warnings].first.to_s)
+          .to eq("Violation foo { sticky: false, file: app/models/user.rb, line: 2 }")
       end
-
     end
   end
 end
