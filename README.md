@@ -1,6 +1,6 @@
-# danger-rails_best_practices
+# danger-rails\_best\_practices
 
-A description of danger-rails_best_practices.
+A danger plugin to check your rails project through rails\_best\_practices.
 
 ## Installation
 

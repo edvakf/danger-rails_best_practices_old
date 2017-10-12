@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = RailsBestPractices::VERSION
   spec.authors       = ['Atsushi Takayama']
   spec.email         = ['taka.atsushi@gmail.com']
-  spec.description   = %q{A short description of danger-rails_best_practices.}
-  spec.summary       = %q{A longer description of danger-rails_best_practices.}
+  spec.description   = %q{A danger plugin to check your rails project through rails_best_practices.}
+  spec.summary       = %q{A danger plugin to check your rails project through rails_best_practices.}
   spec.homepage      = 'https://github.com/edvakf/danger-rails_best_practices'
   spec.license       = 'MIT'
 
