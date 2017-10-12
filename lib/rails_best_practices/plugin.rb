@@ -10,6 +10,10 @@ module Danger
   #
   #          rails_best_practices.check
   #
+  # @example Pass command line options to rails_best_practices
+  #
+  #          rails_best_practices.check(command_opts: ['--debug'])
+  #
   # @see  edvakf/danger-rails_best_practices
   # @tags ruby, rails
   #
