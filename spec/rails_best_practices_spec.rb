@@ -25,7 +25,7 @@ module Danger
           .to be_empty
       end
 
-      it "checks" do
+      it "can comment rails_best_practices warning" do
         allow(@rails_best_practices.git).to receive(:modified_files).and_return(["app/controllers/users_controller.rb"])
         allow(@rails_best_practices.git).to receive(:added_files).and_return(["app/models/user.rb"])
         allow(@rails_best_practices).to receive(:system)
